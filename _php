@@ -1,0 +1,50 @@
+#compdef php
+
+function _artisan_subcommands() {
+    if [ -f artisan ]; then
+        php artisan --raw --no-ansi list | sed 's/[[:space:]].*//g'
+    fi
+}
+
+function _artisan_options() {
+    php artisan help --format=json | jq -r \
+        '.definition.options[] | {name: .name, desc: .description}, {name: .shortcut, desc: .description} | select(.name != "") | (.name + "[" + .desc + "]")'
+}
+
+function _artisan_subcommand_options() {
+    php artisan help $1 --format=json | jq -r \
+        '.definition.options[] | {name: .name, desc: .description}, {name: .shortcut, desc: .description} | select(.name != "") | (.name + "[" + .desc + "]")'
+}
+
+function _artisan() {
+    local state context line
+    local -a _artisan_subcommands
+    local -a _artisan_options
+    local -a _artisan_subcommand_options
+
+    _artisan_subcommands=($(_artisan_subcommands))
+
+    local IFS=$'\n'
+    _artisan_options=($(_artisan_options))
+
+    _arguments : \
+        '1: :_files' \
+        '*:subcommand:->subcommand'
+
+    if [[ "$state" == "subcommand" && "$words[2]" == "artisan" ]]; then
+        if [[ $#words[*] == 4 ]]; then
+            _artisan_subcommand_options=($(_artisan_subcommand_options $words[3]))
+            _arguments -s : \
+                $_artisan_subcommand_options[@] \
+                '*:Sub command Options:()' # XXX なんでこれないと駄目なの？
+        else
+            _arguments -s : \
+                $_artisan_options[@] \
+                '*:Sub commands:($_artisan_subcommands)'
+        fi
+    else
+        _php
+    fi
+}
+
+_artisan
