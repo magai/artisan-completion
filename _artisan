@@ -1,5 +1,3 @@
-#compdef php
-
 function _artisan_subcommands() {
     if [ -f artisan ]; then
         php artisan --raw --no-ansi list | sed 's/[[:space:]].*//g'
@@ -8,12 +6,12 @@ function _artisan_subcommands() {
 
 function _artisan_options() {
     php artisan help --format=json | jq -r \
-        '.definition.options[] | {name: .name, desc: .description}, {name: .shortcut, desc: .description} | select(.name != "") | (.name + "[" + .desc + "]")'
+        'def spl(f): f | split("|"); .definition.options[] | {name: spl(.name), desc: .description}, {name: spl(.shortcut), desc: .description} | {name: .name[], desc: .desc } | select(.name != "") | (.name + "[" + .desc + "]")'
 }
 
 function _artisan_subcommand_options() {
     php artisan help $1 --format=json | jq -r \
-        '.definition.options[] | {name: .name, desc: .description}, {name: .shortcut, desc: .description} | select(.name != "") | (.name + "[" + .desc + "]")'
+        'def spl(f): f | split("|"); .definition.options[] | {name: spl(.name), desc: .description}, {name: spl(.shortcut), desc: .description} | {name: .name[], desc: .desc } | select(.name != "") | (.name + "[" + .desc + "]")'
 }
 
 function _artisan() {
@@ -46,5 +44,3 @@ function _artisan() {
         _php
     fi
 }
-
-_artisan
