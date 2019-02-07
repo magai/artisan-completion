@@ -1,5 +1,3 @@
-#compdef php
-
 function _artisan_subcommands() {
     if [ -f artisan ]; then
         php artisan --raw --no-ansi list | sed 's/[[:space:]].*//g'
@@ -46,5 +44,3 @@ function _artisan() {
         _php
     fi
 }
-
-_artisan
