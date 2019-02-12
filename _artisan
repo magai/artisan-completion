@@ -14,7 +14,7 @@ function _artisan_subcommand_options() {
         'def spl(f): f | split("|"); .definition.options[] | {name: spl(.name), desc: .description}, {name: spl(.shortcut), desc: .description} | {name: .name[], desc: .desc } | select(.name != "") | (.name + "[" + .desc + "]")'
 }
 
-function _artisan_has_subcommend() {
+function _artisan_has_subcommand() {
     for word in $*; do
         if echo - $word | grep -vq '^-'; then
             return 0
@@ -47,7 +47,7 @@ function _artisan() {
             last_index='-2'
         fi
 
-        if _artisan_has_subcommend $words[3,$last_index]; then
+        if _artisan_has_subcommand $words[3,$last_index]; then
             _artisan_subcommand_options=($(_artisan_subcommand_options $words[3]))
             _arguments -s : \
                 $_artisan_subcommand_options[@] \
