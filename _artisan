@@ -24,16 +24,42 @@ function _artisan_has_subcommand() {
     return 1
 }
 
+function _artisan_store_cache() {
+    local key=$1
+    local data=$2
+
+    _store_cache $(_artisan_generate_cache_id_by_filepath_and_key artisan $key) $data
+}
+
+function _artisan_generate_cache_id_by_filepath_and_key() {
+    local filepath=$1
+    local key=$2
+
+    echo "artisan-$(_artisan_hash_filepath $(readlink -f $filepath))-$key"
+}
+
+function _artisan_hash_filepath() {
+    echo $1 | openssl dgst -md5 | awk '{ print $2 }'
+}
+
 function _artisan() {
     local state context line
     local -a _artisan_subcommands
     local -a _artisan_options
     local -a _artisan_subcommand_options
 
-    _artisan_subcommands=($(_artisan_subcommands))
+    if ! _retrieve_cache $(_artisan_generate_cache_id_by_filepath_and_key artisan subcommands); then
+        _artisan_subcommands=($(_artisan_subcommands))
 
-    local IFS=$'\n'
-    _artisan_options=($(_artisan_options))
+        _artisan_store_cache subcommands _artisan_subcommands
+    fi
+
+    if ! _retrieve_cache $(_artisan_generate_cache_id_by_filepath_and_key artisan common_options); then
+        local IFS=$'\n'
+        _artisan_options=($(_artisan_options))
+
+        _artisan_store_cache common_options _artisan_options
+    fi
 
     _arguments : \
         '1: :_files' \
@@ -48,7 +74,13 @@ function _artisan() {
         fi
 
         if _artisan_has_subcommand $words[3,$last_index]; then
-            _artisan_subcommand_options=($(_artisan_subcommand_options $words[3]))
+            if ! _retrieve_cache $(_artisan_generate_cache_id_by_filepath_and_key artisan subcommand_${words[3]}_options); then
+                local IFS=$'\n'
+                _artisan_subcommand_options=($(_artisan_subcommand_options $words[3]))
+
+                _artisan_store_cache subcommand_${words[3]}_options _artisan_subcommand_options
+            fi
+
             _arguments -s : \
                 $_artisan_subcommand_options[@] \
                 '*:Sub command Options:()' # XXX なんでこれないと駄目なの？
