@@ -12,11 +12,9 @@ function _artisan_options() {
 }
 
 function _artisan_has_subcommand() {
-    for word in $*; do
-        if echo - $word | grep -vq '^-'; then
-            return 0
-        fi
-    done
+    if php artisan list --raw | awk '{print $1}' | grep -q "^\\(${*// /\\|}\\)$"; then
+        return 0
+    fi
 
     return 1
 }
