@@ -3,7 +3,7 @@ function _artisan_subcommands() {
         return
     fi
 
-    php artisan list --raw | awk '{print $1}'
+    php artisan list --raw | sed 's/:/\\\:/' | sed 's/[[:space:]]\+/:/'
 }
 
 function _artisan_options() {
@@ -59,6 +59,7 @@ function _artisan() {
 
     if [[ "$state" == "subcommand" && "$words[2]" == "artisan" ]]; then
         if ! _retrieve_cache $(_artisan_generate_cache_id_by_filepath_and_key artisan subcommands); then
+            local IFS=$'\n'
             _artisan_subcommands=($(_artisan_subcommands))
 
             _artisan_store_cache subcommands _artisan_subcommands
@@ -92,7 +93,7 @@ function _artisan() {
         else
             _arguments -s : \
                 $_artisan_options[@] \
-                '*:Sub commands:($_artisan_subcommands)'
+                '*:Sub commands:(($_artisan_subcommands))'
         fi
     else
         _php
