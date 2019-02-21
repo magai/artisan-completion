@@ -45,9 +45,7 @@ function _artisan() {
     local -a _artisan_options
     local -a _artisan_subcommand_options
 
-    _arguments : \
-        '1: :_files' \
-        '*:subcommand:->subcommand'
+    _arguments '*:subcommand:->subcommand'
 
     if [[ "$state" == "subcommand" && "$words[2]" == "artisan" ]]; then
         if ! _retrieve_cache $(_artisan_generate_cache_id_by_filepath_and_key artisan subcommands); then
