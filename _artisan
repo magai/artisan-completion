@@ -3,7 +3,7 @@ function _artisan_subcommands() {
         return
     fi
 
-    php artisan list --raw | awk '{print $1}'
+    php artisan list --raw | sed 's/:/\\\:/' | sed 's/[[:space:]]\+/:/'
 }
 
 function _artisan_options() {
@@ -92,7 +92,7 @@ function _artisan() {
         else
             _arguments -s : \
                 $_artisan_options[@] \
-                '*:Sub commands:($_artisan_subcommands)'
+                '*:Sub commands:(($_artisan_subcommands))'
         fi
     else
         _php
