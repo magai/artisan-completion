@@ -16,7 +16,15 @@ function _artisan_options() {
 }
 
 function _artisan_has_subcommand() {
-    if php artisan list --raw | awk '{print $1}' | grep -q "^\\(${*// /\\|}\\)$"; then
+    local _artisan_list_raw
+
+    if ! _retrieve_cache $(_artisan_generate_cache_id_by_filepath_and_key artisan list_raw); then
+        _artisan_list_raw=$(php artisan list --raw)
+
+        _artisan_store_cache list_raw _artisan_list_raw
+    fi
+
+    if echo $_artisan_list_raw | awk '{print $1}' | grep -q "^\\(${*// /\\|}\\)$"; then
         return 0
     fi
 
