@@ -1,6 +1,6 @@
 function _artisan_subcommands() {
     if [ -f artisan ]; then
-        php artisan --raw --no-ansi list | sed 's/[[:space:]].*//g'
+        php artisan list --raw | sed 's/[[:space:]].*//g'
     fi
 }
 
