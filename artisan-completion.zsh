@@ -3,7 +3,7 @@ function _artisan_subcommands() {
         return
     fi
 
-    php artisan list --raw | sed 's/:/\\\:/' | sed 's/[[:space:]]\+/:/'
+    php artisan list --format=json | jq -r 'def esc(a): a | gsub(":"; "\\:"); .commands[] | [ esc(.name), .description ] | join(":")'
 }
 
 function _artisan_options() {
