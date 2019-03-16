@@ -53,18 +53,18 @@ function _artisan() {
     local -a _artisan_subcommand_options
     local -a _subcommands
 
+    local IFS=$'\n'
+
     _arguments '*:subcommand:->subcommand'
 
     if [[ "$state" == "subcommand" && "$words[2]" == "artisan" ]]; then
         if ! _retrieve_cache $(_artisan_generate_cache_id_by_filepath_and_key artisan subcommands); then
-            local IFS=$'\n'
             _artisan_subcommands=($(_artisan_subcommands))
 
             _artisan_store_cache subcommands _artisan_subcommands
         fi
 
         if ! _retrieve_cache $(_artisan_generate_cache_id_by_filepath_and_key artisan common_options); then
-            local IFS=$'\n'
             _artisan_options=($(_artisan_options))
 
             _artisan_store_cache common_options _artisan_options
@@ -81,7 +81,6 @@ function _artisan() {
 
         if [ ${#_subcommands} -ne 0 ]; then
             if ! _retrieve_cache $(_artisan_generate_cache_id_by_filepath_and_key artisan subcommand_${_subcommands[1]}_options); then
-                local IFS=$'\n'
                 _artisan_subcommand_options=($(_artisan_options $_subcommands[1]))
 
                 _artisan_store_cache subcommand_${_subcommands[1]}_options _artisan_subcommand_options
