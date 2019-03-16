@@ -15,7 +15,7 @@ function _artisan_options() {
         'def spl(f): f | split("|"); def mat(f): f | (if test("\\(") then (match("\\((.*)\\)") | .captures[0].string | [ splits(", |\\s*or\\s*") ] | map(select(. != "")) | ":msg:(" + join(" ") + ")") else "" end); .definition.options[] | {name: spl(.name), desc: .description, value: .accept_value}, {name: spl(.shortcut), desc: .description, value: .accept_value} | {name: .name[], desc: .desc, value: .value } | select(.name != "") | .name + (if .value then "=" else "" end) + "[" + .desc + "]" + mat(.desc)'
 }
 
-function _artisan_has_subcommand() {
+function _artisan_extract_subcommands() {
     local _artisan_list_raw
 
     if ! _retrieve_cache $(_artisan_generate_cache_id_by_filepath_and_key artisan list_raw); then
@@ -24,11 +24,8 @@ function _artisan_has_subcommand() {
         _artisan_store_cache list_raw _artisan_list_raw
     fi
 
-    if echo $_artisan_list_raw | awk '{print $1}' | grep -q "^\\(${*// /\\|}\\)$"; then
-        return 0
-    fi
-
-    return 1
+    local IFS=' '
+    echo $_artisan_list_raw | awk '{print $1}' | grep "^\\(${*// /\\|}\\)$"
 }
 
 function _artisan_store_cache() {
@@ -54,6 +51,7 @@ function _artisan() {
     local -a _artisan_subcommands
     local -a _artisan_options
     local -a _artisan_subcommand_options
+    local -a _subcommands
 
     _arguments '*:subcommand:->subcommand'
 
@@ -79,12 +77,14 @@ function _artisan() {
             last_index='-2'
         fi
 
-        if _artisan_has_subcommand $words[3,$last_index]; then
-            if ! _retrieve_cache $(_artisan_generate_cache_id_by_filepath_and_key artisan subcommand_${words[3]}_options); then
-                local IFS=$'\n'
-                _artisan_subcommand_options=($(_artisan_options $words[3]))
+        _subcommands=($(_artisan_extract_subcommands $words[3,$last_index]))
 
-                _artisan_store_cache subcommand_${words[3]}_options _artisan_subcommand_options
+        if [ ${#_subcommands} -ne 0 ]; then
+            if ! _retrieve_cache $(_artisan_generate_cache_id_by_filepath_and_key artisan subcommand_${_subcommands[1]}_options); then
+                local IFS=$'\n'
+                _artisan_subcommand_options=($(_artisan_options $_subcommands[1]))
+
+                _artisan_store_cache subcommand_${_subcommands[1]}_options _artisan_subcommand_options
             fi
 
             _arguments -s : \
