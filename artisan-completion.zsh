@@ -93,7 +93,7 @@ function _artisan() {
             if [[ $_subcommands[1] == 'help' ]]; then
                 specs+=('*:Sub commands:(($_artisan_subcommands))')
             else
-                specs+=('*:Sub command Options:()')
+                specs+=(':')
             fi
         else
             specs+=($_artisan_options[@] '*:Sub commands:(($_artisan_subcommands))')
