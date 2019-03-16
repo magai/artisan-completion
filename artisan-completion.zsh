@@ -86,9 +86,15 @@ function _artisan() {
                 _artisan_store_cache subcommand_${_subcommands[1]}_options _artisan_subcommand_options
             fi
 
-            _arguments -s : \
-                $_artisan_subcommand_options[@] \
-                '*:Sub command Options:()' # XXX なんでこれないと駄目なの？
+            if [[ $_subcommands[1] == 'help' ]]; then
+                _arguments -s : \
+                    $_artisan_subcommand_options[@] \
+                    '*:Sub commands:(($_artisan_subcommands))'
+            else
+                _arguments -s : \
+                    $_artisan_subcommand_options[@] \
+                    '*:Sub command Options:()' # XXX なんでこれないと駄目なの？
+            fi
         else
             _arguments -s : \
                 $_artisan_options[@] \
