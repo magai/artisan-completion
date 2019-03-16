@@ -79,6 +79,8 @@ function _artisan() {
 
         _subcommands=($(_artisan_extract_subcommands $words[3,$last_index]))
 
+        local -a specs
+
         if [ ${#_subcommands} -ne 0 ]; then
             if ! _retrieve_cache $(_artisan_generate_cache_id_by_filepath_and_key artisan subcommand_${_subcommands[1]}_options); then
                 _artisan_subcommand_options=($(_artisan_options $_subcommands[1]))
@@ -86,20 +88,18 @@ function _artisan() {
                 _artisan_store_cache subcommand_${_subcommands[1]}_options _artisan_subcommand_options
             fi
 
+            specs+=($_artisan_subcommand_options[@])
+
             if [[ $_subcommands[1] == 'help' ]]; then
-                _arguments -s : \
-                    $_artisan_subcommand_options[@] \
-                    '*:Sub commands:(($_artisan_subcommands))'
+                specs+=('*:Sub commands:(($_artisan_subcommands))')
             else
-                _arguments -s : \
-                    $_artisan_subcommand_options[@] \
-                    '*:Sub command Options:()' # XXX なんでこれないと駄目なの？
+                specs+=('*:Sub command Options:()')
             fi
         else
-            _arguments -s : \
-                $_artisan_options[@] \
-                '*:Sub commands:(($_artisan_subcommands))'
+            specs+=($_artisan_options[@] '*:Sub commands:(($_artisan_subcommands))')
         fi
+
+        _arguments -s : $specs[@]
     else
         _php
     fi
