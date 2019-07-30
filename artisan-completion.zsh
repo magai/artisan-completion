@@ -12,7 +12,7 @@ function _artisan_options() {
     fi
 
     php artisan help $1 --format=json | jq -r \
-        'def spl(f): f | split("|"); def mat(f): f | (if test("\\(") then (match("\\((.*)\\)") | .captures[0].string | [ splits(", |\\s*or\\s*") ] | map(select(. != "")) | ":msg:(" + join(" ") + ")") else "" end); .definition.options[] | {name: spl(.name), desc: .description, value: .accept_value}, {name: spl(.shortcut), desc: .description, value: .accept_value} | {name: .name[], desc: .desc, value: .value } | select(.name != "") | .name + (if .value then "=" else "" end) + "[" + .desc + "]" + mat(.desc)'
+        'def spl(f): f | split("|"); def mat(f): f | (if test("\\(") then (match("\\((.*)\\)") | .captures[0].string | [ splits(", |\\s*or\\s*") ] | map(select(. != "")) | ":msg:(" + join(" ") + ")") else "" end); def esc(a): a | gsub(":"; "\\:") | gsub("\\]"; "\\]"); .definition.options[] | {name: spl(.name), desc: .description, value: .accept_value}, {name: spl(.shortcut), desc: .description, value: .accept_value} | {name: .name[], desc: .desc, value: .value } | select(.name != "") | .name + (if .value then "=" else "" end) + "[" + esc(.desc) + "]" + mat(.desc)'
 }
 
 function _artisan_extract_subcommands() {
